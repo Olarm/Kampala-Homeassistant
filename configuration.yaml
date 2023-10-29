@@ -1,0 +1,49 @@
+# Configure a default setup of Home Assistant (frontend, api, etc)
+default_config:
+
+# Uncomment this if you are using SSL/TLS, running in Docker container, etc.
+# http:
+#   base_url: example.duckdns.org:8123
+
+http:
+  use_x_forwarded_for: true
+  trusted_proxies: 127.0.0.1
+
+# Text to speech
+tts:
+  - platform: google_translate
+
+recorder:
+  db_url: !secret db_url
+  purge_keep_days: 730
+
+owntracks:
+  mqtt_topic: "owntracks/#"
+
+telegram_bot:
+  - platform: polling
+    api_key: !secret telegram_api_key
+    allowed_chat_ids:
+      - !secret chat_id_1
+  
+mqtt:
+  sensor:
+    - name: "power_price_mean"
+      state_topic: "power_price"
+      unit_of_measurement: "bool"
+      value_template: "{{ value_json.price_below_mean }}"
+
+shell_command:
+  wol_kidal: wakeonlan 6c:f0:49:50:fb:ef
+
+device_tracker: !include include/device_tracker.yaml
+automation: !include automations.yaml
+script: !include include/scripts.yaml
+scene: !include include/scenes.yaml
+zone: !include include/zone.yaml
+input_boolean: !include include/input_boolean.yaml
+climate: !include include/climate.yaml
+light: !include include/lights.yaml
+notify: !include include/notify.yaml
+sensor: !include include/sensors.yaml
+binary_sensor: !include include/binary_sensor.yaml

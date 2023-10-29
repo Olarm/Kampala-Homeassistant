@@ -1,0 +1,15 @@
+- platform: template
+  sensors:
+    ola_hjemme:      
+      device_class: presence
+      value_template: "{{ is_state('device_tracker.olas_pixel7_pro', 'home') }}"
+    helene_hjemme:      
+      device_class: presence
+      value_template: "{{ is_state('device_tracker.helene_huawei_p30', 'home') }}"
+
+- platform: group
+  name: "Ola og Helene"
+  device_class: presence
+  entities:
+    - binary_sensor.ola_hjemme
+    - binary_sensor.helene_hjemme

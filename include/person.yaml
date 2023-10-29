@@ -1,0 +1,9 @@
+- name: Ola
+  id: ola
+  device_trackers:
+    - device_tracker.olas_pixel7_pro
+
+- name: Helene
+  id: helene
+  device_trackers:
+    - device_tracker.helene_huawei_p30

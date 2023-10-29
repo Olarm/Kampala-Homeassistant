@@ -1,0 +1,11 @@
+*.log*
+*.swp
+*.db
+
+.HA_VERSION
+.storage
+secrets.yaml
+known_devices.yaml
+deps
+www 
+custom_components

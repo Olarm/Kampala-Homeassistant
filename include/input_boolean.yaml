@@ -1,0 +1,11 @@
+hjemme:
+  name: hjemme
+  initial: on
+
+airbnb:
+  name: airbnb
+  initial: off
+
+kidal:
+  name: wake kidal
+  initial: off

@@ -1,0 +1,4 @@
+#- platform: generic_thermostat
+#  name: Stue
+#  heater: switch.0x5c0272fffe84e83e
+#  target_sensor: sensor.climate_temperature

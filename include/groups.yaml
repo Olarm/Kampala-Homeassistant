@@ -1,0 +1,17 @@
+#all_lights:
+#  name: "Alle lys"
+#  icon: "mdi:lightbulb-group"
+#  entities:
+#    - light.taklys_stue
+#    - light.taklys_gang
+#    - light.taklys_soverom
+#    - light.lys_kontor
+#    - switch.lys_skjenk
+#
+#helenes_lights:
+#  name: "Helenes stemning"
+#  icon: "mdi:lightbulb-group"
+#  entities:
+#    - light.lys_kontor
+#    - switch.lys_skjenk
+

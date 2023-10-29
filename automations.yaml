@@ -1,0 +1,853 @@
+- alias: Bod gang lys pa
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.dor_bod_gang_contact
+    to: 'on'
+  action:
+  - service: switch.turn_on
+    target:
+      entity_id: switch.lys_bod_gang
+  id: e1f556c4f7fb42e5a7bf9c9fb753a27e
+- alias: Bod gang lys av
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.dor_bod_gang_contact
+    to: 'off'
+  action:
+  - service: switch.turn_off
+    target:
+      entity_id: switch.lys_bod_gang
+  id: dd4635d5bb904050b9a3124363cb94f6
+- alias: Bevegelse aktivert lys matbod
+  mode: restart
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.bevegelse_matbod_occupancy
+    to: 'on'
+  action:
+  - service: switch.turn_on
+    target:
+      entity_id: switch.lys_matbod
+  id: 06ceba77807a4c4f96c0a79ced4b8953
+- alias: Ingen bevegelse matbod
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.bevegelse_matbod_occupancy
+    to: 'off'
+    for: 00:01:00
+  action:
+  - service: switch.turn_off
+    target:
+      entity_id: switch.lys_matbod
+  id: a36a6849db4648f6ae5f8873abd23d9a
+- alias: Start varmtvannstank om natten
+  trigger:
+  - platform: time_pattern
+    minutes: '25'
+  condition:
+  - condition: numeric_state
+    entity_id: sensor.ams_614b_houruse
+    below: 1.0
+  - condition: time
+    after: 00:00:00
+    before: 07:00:00
+  action:
+  - service: switch.turn_on
+    target:
+      entity_id: switch.shellyplug_water_heater
+  id: f25746cd1c3b4b52bcdaac42e3311d62
+- alias: Start varmtvannstank om dagen
+  trigger:
+  - platform: time_pattern
+    minutes: '30'
+  condition:
+  - condition: numeric_state
+    entity_id: sensor.ams_614b_houruse
+    below: 1.4
+  - condition: time
+    after: 07:00:00
+    before: 00:00:00
+  action:
+  - service: switch.turn_on
+    target:
+      entity_id: switch.shellyplug_water_heater
+  id: 68b7c6ccab7a4d2cae9271761d0d1aa8
+- alias: Stopp varmtvannstank
+  trigger:
+  - platform: time_pattern
+    minutes: '00'
+  - platform: numeric_state
+    entity_id: sensor.ams_614b_p
+    above: 5000
+  action:
+  - service: switch.turn_off
+    target:
+      entity_id: switch.shellyplug_water_heater
+  id: 198587ac9f464bd6bea7953cfce82b7a
+- alias: varmgang varmtvannsbereder shellyplug
+  trigger:
+  - platform: state
+    entity_id: sensor.shellyplug_s_083a8dc14877_device_temperature
+    above: 50
+  action:
+  - service: notify.Ola
+    data_template:
+      message: Advarsel! varmgang i veggplugg til varmtvannsbereder > 50C.
+  - service: switch.turn_off
+    target:
+      entity_id: switch.shellyplug_water_heater
+  id: 3119809dd8b2430aad1996a95186ab37
+- id: 66ec1218980d4837a8ff354d6b8b1341
+  alias: Varsel Ola hjemme
+  trigger:
+  - platform: state
+    entity_id:
+    - device_tracker.olas_pixel7_pro
+    from: not_home
+    to: home
+  condition:
+  - condition: state
+    entity_id: input_boolean.hjemme
+    state: 'off'
+  action:
+  - service: notify.mobile_app_pixel_7_pro
+    data:
+      message: Ola er hjemme
+- alias: Alarm stue
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.stue_motion_2
+    from: 'off'
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: input_boolean.hjemme
+    state: 'off'
+  action:
+  - service: notify.Ola
+    data_template:
+      message: Alarm! bevegelse stue
+  id: a7267b9128654658a99640fe6db23ff7
+- alias: Alarm soverom
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.soverom_motion
+    from: 'off'
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: input_boolean.hjemme
+    state: 'off'
+  action:
+  - service: notify.mobile_app_pixel_7_pro
+    data_template:
+      message: Alarm! bevegelse soverom
+  id: c146229adf2343f785a4f9f035de072d
+- alias: kjokkenbenk lys pa
+  trigger:
+  - platform: state
+    entity_id: sensor.lysbryter_kaffebenk_click
+    to: 'on'
+  action:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.kjokken_bright
+  id: 11ce185f947c4d2fb2c4c8d3614893c4
+- alias: kjokkenbenk lys av
+  trigger:
+  - platform: state
+    entity_id: sensor.lysbryter_kaffebenk_click
+    to: 'off'
+  action:
+  - service: light.turn_off
+    target:
+      entity_id: light.kjokkenbenk
+  id: 500b0f0fa07949668d29559ae5c98c47
+- id: 0fb1671b38c1432e88df704aca56f9e0
+  alias: kjokkenbenk lys pa natt
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.bevegelse_stue_syd_occupancy
+    to: 'on'
+  - platform: state
+    entity_id:
+    - binary_sensor.bevegelse_inngang_occupancy
+    to: 'on'
+  condition:
+  - condition: and
+    conditions:
+    - condition: state
+      entity_id: light.kjokkenbenk
+      state: 'off'
+    - condition: or
+      conditions:
+      - condition: sun
+        before: sunrise
+      - condition: sun
+        after: sunset
+  action:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.kjokken_dimmed
+    data: {}
+  - delay: 00:05:00
+  - service: light.turn_off
+    target:
+      entity_id: light.kjokkenbenk
+    data: {}
+  mode: restart
+- alias: Ola og Helene borte
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.ola_og_helene
+    to: away
+    for: 00:30:00
+  condition:
+  - condition: state
+    entity_id: input_boolean.airbnb
+    state: 'off'
+  action:
+  - service: notify.Ola
+    data_template:
+      message: Ola og Helene borte, alarm aktivert
+  - service: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.hjemme
+  id: 4579cab505a346c390115b5845ba8f50
+- alias: test notifications
+  trigger:
+  - platform: state
+    entity_id: input_boolean.airbnb
+    to: 'on'
+  action:
+  - service: notify.mobile_app_pixel_7_pro
+    data:
+      message: Airbnb activated
+  id: dac835eec76849edbab14c3f44ac2b66
+- id: '1687013561884'
+  alias: Inngangsdør åpnet
+  description: Notify when front door opens
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.dor_inngang_contact
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: input_boolean.hjemme
+    state: 'off'
+  action:
+  - service: notify.mobile_app_pixel_7_pro
+    data:
+      message: Inngangsdør åpen
+  - service: notify.mobile_app_ola_sin_iphone
+    data:
+      message: Inngangsdør åpen
+  mode: single
+- id: '1687014524681'
+  alias: Til Helene
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_boolean.airbnb
+    from: 'off'
+    to: 'on'
+  condition: []
+  action:
+  - service: notify.mobile_app_helene_sin_iphone
+    data:
+      message: Ola elsker deg
+      title: Til Helene
+  mode: single
+- id: '1687015920362'
+  alias: Inngangsdør låst opp
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - lock.dorlas_inngang
+    to: unlocked
+  condition:
+  - condition: state
+    entity_id: input_boolean.hjemme
+    state: 'off'
+  action:
+  - service: notify.mobile_app_pixel_7_pro
+    data:
+      message: Inngangsdør låst opp
+  - service: notify.mobile_app_ola_sin_iphone
+    data:
+      message: Inngangsdør låst opp
+  mode: single
+- id: '1687016188322'
+  alias: Hagedør åpnet
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.dor_hage_contact
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: input_boolean.hjemme
+    state: 'off'
+  action:
+  - service: notify.mobile_app_pixel_7_pro
+    data:
+      message: Hagedør åpnet
+  - service: notify.mobile_app_ola_sin_iphone
+    data:
+      message: Hagedør åpnet
+  mode: single
+- id: '1688205671483'
+  alias: Inngang fest
+  description: Låser opp inngangsdøren ved bevegelse utenfor
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.bevegelse_inngang_ute_occupancy
+    to: 'on'
+  condition: []
+  action:
+  - device_id: c8ef4fbea05b018d0670ad38842d5e09
+    domain: lock
+    entity_id: lock.dorlas_inngang
+    type: unlock
+  mode: single
+- id: '1690395855820'
+  alias: Bevegelse inngang
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.bevegelse_inngang_occupancy
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: input_boolean.hjemme
+    state: 'off'
+  action:
+  - service: notify.mobile_app_pixel_7_pro
+    data:
+      message: Bevegelse inngang
+  mode: single
+- id: '1697141822130'
+  alias: Wake Kidal
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_boolean.kidal
+    from: 'off'
+    to: 'on'
+  condition: []
+  action:
+  - service: shell_command.wol_kidal
+    data: {}
+  - service: input_boolean.turn_off
+    data: {}
+    target:
+      entity_id: input_boolean.kidal
+  mode: single
+- id: '1697149435680'
+  alias: Morgenvarme
+  description: Skru på varmepumpe kl 05
+  trigger:
+  - platform: time
+    at: 05:30:00
+  condition: []
+  action:
+  - service: climate.set_temperature
+    data:
+      temperature: 24
+      hvac_mode: heat
+    target:
+      device_id: 388b132b279d64e6356c353e09af4ef7
+  - service: climate.set_fan_mode
+    data:
+      fan_mode: '2'
+    target:
+      device_id: 388b132b279d64e6356c353e09af4ef7
+  mode: single
+- id: '1697317595304'
+  alias: Bad lys natt
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.dor_bad_contact
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: light.dimmer_bad
+    state: 'off'
+  - condition: sun
+    before: sunrise
+    after: sunset
+  action:
+  - service: light.turn_on
+    data:
+      brightness_pct: 10
+    target:
+      device_id: e145a6812c811c351e0943b6f443e390
+  mode: single
+- id: '1697325066839'
+  alias: Bad lys dag
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.dor_bad_contact
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: light.dimmer_bad
+    state: 'off'
+  - condition: sun
+    before: sunset
+    after: sunrise
+  action:
+  - service: light.turn_on
+    data:
+      brightness_pct: 100
+    target:
+      device_id: e145a6812c811c351e0943b6f443e390
+  mode: single
+- id: '1698095209877'
+  alias: Morgenlys
+  description: ''
+  trigger:
+  - platform: template
+    value_template: '{{ as_timestamp(states(''sensor.pixel_7_pro_next_alarm'')) -
+      1200 < as_timestamp(now()) }}'
+  condition: []
+  action:
+  - service: light.turn_on
+    data:
+      color_temp: 410
+      transition: 0
+      brightness_pct: 1
+    target:
+      device_id: 9caf56df4ab0683d8966b87860dda53b
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 1
+      milliseconds: 0
+  - service: light.turn_on
+    data:
+      color_temp: 410
+      transition: 300
+      brightness_pct: 60
+    target:
+      device_id: 9caf56df4ab0683d8966b87860dda53b
+  - delay:
+      hours: 0
+      minutes: 5
+      seconds: 0
+      milliseconds: 0
+  - service: light.turn_on
+    data:
+      brightness_pct: 1
+    target:
+      device_id: 2b4d8ae7ea2c2f16943388c5ef716798
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+  - service: light.turn_on
+    data:
+      transition: 300
+      brightness_pct: 10
+    target:
+      device_id: 2b4d8ae7ea2c2f16943388c5ef716798
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+  - service: light.turn_on
+    data:
+      transition: 300
+      brightness_pct: 20
+    target:
+      device_id: 2b4d8ae7ea2c2f16943388c5ef716798
+  mode: single
+- id: '1698264798214'
+  alias: morgenmusikk
+  description: ''
+  trigger:
+  - platform: template
+    value_template: '{{ as_timestamp(states(''sensor.pixel_7_pro_next_alarm'')) -
+      1200 < as_timestamp(now()) }}'
+  condition: []
+  action:
+  - service: media_player.play_media
+    target:
+      entity_id: media_player.stue
+    data:
+      media_content_id: spotify://9dbafb74923674e4467ae19e02f60005/spotify:track:6G3IBH8XyjswVaPxmdoC5o
+      media_content_type: spotify://track
+    metadata:
+      title: First Light
+      thumbnail: https://i.scdn.co/image/ab67616d0000b2734b09be45541cd6bd06e9a1e1
+      media_class: track
+      children_media_class:
+      navigateIds:
+      - {}
+      - media_content_type: spotify://library
+        media_content_id: spotify://9dbafb74923674e4467ae19e02f60005
+      - media_content_type: spotify://current_user_playlists
+        media_content_id: spotify://9dbafb74923674e4467ae19e02f60005/current_user_playlists
+      - media_content_type: spotify://playlist
+        media_content_id: spotify://9dbafb74923674e4467ae19e02f60005/spotify:playlist:37i9dQZF1DX7cZxYLqLUJl
+  - service: media_player.volume_set
+    data:
+      volume_level: 0.01
+    target:
+      entity_id: media_player.stue
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+  - service: media_player.volume_set
+    data:
+      volume_level: 0.02
+    target:
+      entity_id: media_player.stue
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+  - service: media_player.volume_set
+    data:
+      volume_level: 0.03
+    target:
+      entity_id: media_player.stue
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 2
+      milliseconds: 0
+  - service: media_player.play_media
+    target:
+      entity_id: media_player.stue
+    data:
+      media_content_id: spotify://9dbafb74923674e4467ae19e02f60005/spotify:track:0DFAkAHNm5XxqEEYkFbHcI
+      media_content_type: spotify://track
+    metadata:
+      title: a joyful life
+      thumbnail: https://i.scdn.co/image/ab67616d0000b273ba9c643801afb5393a2d1be8
+      media_class: track
+      children_media_class:
+      navigateIds:
+      - {}
+      - media_content_type: spotify://library
+        media_content_id: spotify://9dbafb74923674e4467ae19e02f60005
+      - media_content_type: spotify://current_user_playlists
+        media_content_id: spotify://9dbafb74923674e4467ae19e02f60005/current_user_playlists
+      - media_content_type: spotify://playlist
+        media_content_id: spotify://9dbafb74923674e4467ae19e02f60005/spotify:playlist:37i9dQZF1DX7cZxYLqLUJl
+  - service: media_player.volume_set
+    data:
+      volume_level: 0.04
+    target:
+      entity_id: media_player.stue
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+  - service: media_player.volume_set
+    data:
+      volume_level: 0.05
+    target:
+      entity_id: media_player.stue
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 5
+      milliseconds: 0
+  - service: media_player.play_media
+    target:
+      entity_id: media_player.stue
+    data:
+      media_content_id: spotify://9dbafb74923674e4467ae19e02f60005/spotify:track:4SGQ9TT7NTUAMnYvuwsWfW
+      media_content_type: spotify://track
+    metadata:
+      title: Respiro
+      thumbnail: https://i.scdn.co/image/ab67616d0000b273ee2a9a45ca5e8b77bdb6a4e2
+      media_class: track
+      children_media_class:
+      navigateIds:
+      - {}
+      - media_content_type: spotify://library
+        media_content_id: spotify://9dbafb74923674e4467ae19e02f60005
+      - media_content_type: spotify://current_user_playlists
+        media_content_id: spotify://9dbafb74923674e4467ae19e02f60005/current_user_playlists
+      - media_content_type: spotify://playlist
+        media_content_id: spotify://9dbafb74923674e4467ae19e02f60005/spotify:playlist:37i9dQZF1DX7cZxYLqLUJl
+  - service: media_player.volume_set
+    data:
+      volume_level: 0.06
+    target:
+      entity_id: media_player.stue
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+  - service: media_player.volume_set
+    data:
+      volume_level: 0.07
+    target:
+      entity_id: media_player.stue
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 2
+      milliseconds: 0
+  - service: media_player.play_media
+    target:
+      entity_id: media_player.stue
+    data:
+      media_content_id: spotify://9dbafb74923674e4467ae19e02f60005/spotify:track:1VhGpGEKywAKiCd3OmRev3
+      media_content_type: spotify://track
+    metadata:
+      title: I'll Be The One
+      thumbnail: https://i.scdn.co/image/ab67616d0000b27385ec4d3a4e36167eca62036a
+      media_class: track
+      children_media_class:
+      navigateIds:
+      - {}
+      - media_content_type: spotify://library
+        media_content_id: spotify://9dbafb74923674e4467ae19e02f60005
+      - media_content_type: spotify://current_user_playlists
+        media_content_id: spotify://9dbafb74923674e4467ae19e02f60005/current_user_playlists
+      - media_content_type: spotify://playlist
+        media_content_id: spotify://9dbafb74923674e4467ae19e02f60005/spotify:playlist:37i9dQZF1DX7cZxYLqLUJl
+  - service: media_player.volume_set
+    data:
+      volume_level: 0.08
+    target:
+      entity_id: media_player.stue
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+  - service: media_player.volume_set
+    data:
+      volume_level: 0.09
+    target:
+      entity_id: media_player.stue
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 10
+      milliseconds: 0
+  - service: media_player.play_media
+    target:
+      entity_id: media_player.stue
+    data:
+      media_content_id: spotify://9dbafb74923674e4467ae19e02f60005/spotify:track:2wPHCAgYiIIfEMt4Lj1xMg
+      media_content_type: spotify://track
+    metadata:
+      title: Becoming
+      thumbnail: https://i.scdn.co/image/ab67616d0000b2735bceb5ae9f903be7f6c3023f
+      media_class: track
+      children_media_class:
+      navigateIds:
+      - {}
+      - media_content_type: spotify://library
+        media_content_id: spotify://9dbafb74923674e4467ae19e02f60005
+      - media_content_type: spotify://current_user_playlists
+        media_content_id: spotify://9dbafb74923674e4467ae19e02f60005/current_user_playlists
+      - media_content_type: spotify://playlist
+        media_content_id: spotify://9dbafb74923674e4467ae19e02f60005/spotify:playlist:37i9dQZF1DX7cZxYLqLUJl
+  - service: media_player.volume_set
+    data:
+      volume_level: 0.1
+    target:
+      entity_id: media_player.stue
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+  - service: media_player.volume_set
+    data:
+      volume_level: 0.11
+    target:
+      entity_id: media_player.stue
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+  - service: media_player.volume_set
+    data:
+      volume_level: 0.12
+    target:
+      entity_id: media_player.stue
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 39
+      milliseconds: 0
+  - service: media_player.play_media
+    target:
+      entity_id: media_player.stue
+    data:
+      media_content_id: spotify://9dbafb74923674e4467ae19e02f60005/spotify:track:3YKPxRJDUHhnFJUyjV57JQ
+      media_content_type: spotify://track
+    metadata:
+      title: Certain Days
+      thumbnail: https://i.scdn.co/image/ab67616d0000b2739ab96584270a7f1a521a05ec
+      media_class: track
+      children_media_class:
+      navigateIds:
+      - {}
+      - media_content_type: spotify://library
+        media_content_id: spotify://9dbafb74923674e4467ae19e02f60005
+      - media_content_type: spotify://current_user_playlists
+        media_content_id: spotify://9dbafb74923674e4467ae19e02f60005/current_user_playlists
+      - media_content_type: spotify://playlist
+        media_content_id: spotify://9dbafb74923674e4467ae19e02f60005/spotify:playlist:37i9dQZF1DX7cZxYLqLUJl
+  - service: media_player.volume_set
+    data:
+      volume_level: 0.13
+    target:
+      entity_id: media_player.stue
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+  - service: media_player.volume_set
+    data:
+      volume_level: 0.14
+    target:
+      entity_id: media_player.stue
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 15
+      milliseconds: 0
+  - service: media_player.volume_set
+    data:
+      volume_level: 0.15
+    target:
+      entity_id: media_player.stue
+  - service: media_player.play_media
+    target:
+      entity_id: media_player.stue
+    data:
+      media_content_id: spotify://9dbafb74923674e4467ae19e02f60005/spotify:track:7oEbJXeTbSSWBNVr0RHRgM
+      media_content_type: spotify://track
+    metadata:
+      title: Mirno
+      thumbnail: https://i.scdn.co/image/ab67616d0000b2732ea0b20122c381931e7f7e50
+      media_class: track
+      children_media_class:
+      navigateIds:
+      - {}
+      - media_content_type: spotify://library
+        media_content_id: spotify://9dbafb74923674e4467ae19e02f60005
+      - media_content_type: spotify://current_user_playlists
+        media_content_id: spotify://9dbafb74923674e4467ae19e02f60005/current_user_playlists
+      - media_content_type: spotify://playlist
+        media_content_id: spotify://9dbafb74923674e4467ae19e02f60005/spotify:playlist:37i9dQZF1DX7cZxYLqLUJl
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+  - service: media_player.volume_set
+    data:
+      volume_level: 0.16
+    target:
+      entity_id: media_player.stue
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 55
+      milliseconds: 0
+  - service: media_player.volume_set
+    data:
+      volume_level: 0.17
+    target:
+      entity_id: media_player.stue
+  - service: media_player.play_media
+    target:
+      entity_id: media_player.stue
+    data:
+      media_content_id: spotify://9dbafb74923674e4467ae19e02f60005/spotify:track:6viyU00wxyxXRBqyVA0GxG
+      media_content_type: spotify://track
+    metadata:
+      title: Mi Amor
+      thumbnail: https://i.scdn.co/image/ab67616d0000b273fe6789c12f09bf1d050589d2
+      media_class: track
+      children_media_class:
+      navigateIds:
+      - {}
+      - media_content_type: spotify://library
+        media_content_id: spotify://9dbafb74923674e4467ae19e02f60005
+      - media_content_type: spotify://current_user_playlists
+        media_content_id: spotify://9dbafb74923674e4467ae19e02f60005/current_user_playlists
+      - media_content_type: spotify://playlist
+        media_content_id: spotify://9dbafb74923674e4467ae19e02f60005/spotify:playlist:37i9dQZF1DX7cZxYLqLUJl
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+  - service: media_player.volume_set
+    data:
+      volume_level: 0.18
+    target:
+      entity_id: media_player.stue
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+  - service: media_player.volume_set
+    data:
+      volume_level: 0.19
+    target:
+      entity_id: media_player.stue
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 21
+      milliseconds: 0
+  - service: media_player.volume_set
+    data:
+      volume_level: 0.2
+    target:
+      entity_id: media_player.stue
+  - service: media_player.play_media
+    target:
+      entity_id: media_player.stue
+    data:
+      media_content_id: spotify://9dbafb74923674e4467ae19e02f60005/spotify:track:61WmSJkNz048nns7uCmn1E
+      media_content_type: spotify://track
+    metadata:
+      title: Snefri
+      thumbnail: https://i.scdn.co/image/ab67616d0000b273a3d60db7136a604662875cff
+      media_class: track
+      children_media_class:
+      navigateIds:
+      - {}
+      - media_content_type: spotify://library
+        media_content_id: spotify://9dbafb74923674e4467ae19e02f60005
+      - media_content_type: spotify://current_user_playlists
+        media_content_id: spotify://9dbafb74923674e4467ae19e02f60005/current_user_playlists
+      - media_content_type: spotify://playlist
+        media_content_id: spotify://9dbafb74923674e4467ae19e02f60005/spotify:playlist:37i9dQZF1DX7cZxYLqLUJl
+  mode: single

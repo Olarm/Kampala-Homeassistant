@@ -1,0 +1,5 @@
+  sensor:
+    - name: "RSSI"
+      state_topic: "power_price"
+      unit_of_measurement: "bool"
+      value_template: "{{ value_json.price_below_mean }}"
