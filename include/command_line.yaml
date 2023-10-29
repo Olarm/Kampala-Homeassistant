@@ -1,0 +1,4 @@
+- sensor:
+    scan_interval: 120
+    name: IP addresse
+    command: "curl ifconfig.me"

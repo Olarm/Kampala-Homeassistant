@@ -47,3 +47,4 @@ light: !include include/lights.yaml
 notify: !include include/notify.yaml
 sensor: !include include/sensors.yaml
 binary_sensor: !include include/binary_sensor.yaml
+command_line: !include include/command_line.yaml

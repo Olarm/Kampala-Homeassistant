@@ -13,11 +13,6 @@
     - type: processor_use
     - type: last_boot
 
-- platform: command_line
-  scan_interval: 120
-  name: IP addresse
-  command: "curl ifconfig.me"
-
 - platform: integration
   source: sensor.shellyplug_s_083a8dc14877_power
   name: "Varmtvannsbereder energi time"
